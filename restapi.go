@@ -7,9 +7,7 @@ import (
 	"log"
 	"net/http"
 	"time"
-	"encoding/json"
-	"io/ioutil"
-	"os/exec"
+  "sync"
 
   "github.com/gorilla/mux"
   "golang.org/x/time/rate"
@@ -27,7 +25,7 @@ var limiter = rate.NewLimiter(1, 6)
 
 // Create a map to hold the visitor structs for each ip
 var visitors = make(map[string]*visitor)
-var mtx sync.Mutexvar mtx sync.Mutex
+var mtx sync.Mutex
 
 // Create a new rate limiter and add it to the visitors map, using the
 // IP address as the key.
@@ -86,16 +84,11 @@ func limit(next http.Handler) http.Handler {
     })
 }
 
-func UnpackPayload(filename string) (payload Payload, err error) {
-	raw, err := ioutil.ReadFile(filename)
-	if err != nil {
-		return
-	}
-	json.Unmarshal(raw, &payload)
-	return
+func TokenPairs(w http.ResponseWriter, r *http.Request) {
+
 }
 
-func TokenPairs(w http.ResponseWriter, r *http.Request) {
+func Token(w http.ResponseWriter, r *http.Request) {
 
 }
 
@@ -133,7 +126,7 @@ func main() {
 	r.HandleFunc("/v0/orderbook", Orderbook)
   r.HandleFunc("/v0/fees", Fees)
   r.HandleFunc("/v0/order", Order)
-	go log.Fatal(http.ListenAndServe(":8080", limit(r))
+	go log.Fatal(http.ListenAndServe(":8080", limit(r)))
 }
 
 // Run a background goroutine to remove old entries from the visitors map.
