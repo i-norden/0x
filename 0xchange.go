@@ -1,27 +1,26 @@
 package main
 
 import (
-	"time"
 	"log"
 	"net/http"
-  "sync"
 	"os"
+	"sync"
+	"time"
 
-  "github.com/gorilla/mux"
-  "github.com/i-norden/golimiter"
+	"github.com/gorilla/mux"
+	"github.com/i-norden/golimiter"
 )
-
 
 // Exchange structs
 
 type exchange struct {
-	users []user
+	users   []user
 	markets []market
 }
 
 type market struct {
 	sync.Mutex
-	pair string
+	pair      string
 	orderbook struct {
 		bids []level
 		asks []level
@@ -29,25 +28,25 @@ type market struct {
 }
 
 type level struct {
-	rate float64
+	rate          float64
 	totalQuantity float64
-	orders	[]limitOrder
+	orders        []limitOrder
 }
 
 type limitOrder struct {
-	time time.Time
-	side string
-	rate float64
-	quantity float64
-	orderID string
+	time       time.Time
+	side       string
+	rate       float64
+	quantity   float64
+	orderID    string
 	conditions map[string]interface{}
 }
 
 type marketOrder struct {
-	time time.Time
-	side string
-	quantity float64
-	orderID string
+	time       time.Time
+	side       string
+	quantity   float64
+	orderID    string
 	conditions map[string]interface{}
 }
 
@@ -59,9 +58,9 @@ type user struct {
 }
 
 type account struct {
-	id string
-	balances map[string]balances
-	orders map[string]limitOrder // map of orderIDs to the corresponding order
+	id           string
+	balances     map[string]balances
+	orders       map[string]limitOrder // map of orderIDs to the corresponding order
 	orderHistory struct {
 		limiterOrders []limitOrder
 		marketOrders  []marketOrder
@@ -69,9 +68,9 @@ type account struct {
 }
 
 type balances struct {
-	available float64
+	available   float64
 	unavailable float64
-	total float64
+	total       float64
 }
 
 // Management structs
@@ -80,7 +79,6 @@ type management struct {
 	sync.Mutex
 	activeProcesses map[string]*os.Process
 }
-
 
 // Http handler functions for API endpoints
 
@@ -115,15 +113,15 @@ func Order(w http.ResponseWriter, r *http.Request) {
 // Main process
 
 func main() {
-  r := mux.NewRouter()
-  r.Methods("GET", "POST")
+	r := mux.NewRouter()
+	r.Methods("GET", "POST")
 	r.HandleFunc("/v0/token_pairs", TokenPairs)
-  r.HandleFunc("/v0/token_pairs/{token}", Token)
+	r.HandleFunc("/v0/token_pairs/{token}", Token)
 	r.HandleFunc("/v0/orders", Orders)
 	r.HandleFunc("/v0/order/{orderHash}", OrderHash)
 	r.HandleFunc("/v0/orderbook", Orderbook)
-  r.HandleFunc("/v0/fees", Fees)
-  r.HandleFunc("/v0/order", Order)
+	r.HandleFunc("/v0/fees", Fees)
+	r.HandleFunc("/v0/order", Order)
 	lim := golimiter.Limiter{}
 	lim.Rate = 1
 	lim.Burst = 5
