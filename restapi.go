@@ -1,5 +1,3 @@
-//make it so that if a client closes a websocket connection any ruby processes that are no longer needed for other feeds are exited
-//make it so client can choose what period to query at and also which indicator set (out of the 4 premade first)
 package main
 
 import (
